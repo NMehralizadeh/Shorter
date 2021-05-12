@@ -23,11 +23,11 @@ export class AppController {
   @Get(':unqUrl')
   redirectToUrl(
     @Req() request: Request,
-    @Param() params,
+    @Param('unqUrl') unqUrl: string,
     @Res() response: Response,
   ) {
     //Log user request and information like IP, Browser, OS,
-    const redirectedUrl = this.urlService.getMainUrlByUniqueUrl(params.unqUrl);
+    const redirectedUrl = this.urlService.getMainUrlByUniqueUrl(unqUrl);
     if (redirectedUrl) {
       response.redirect(redirectedUrl);
     } else {
