@@ -1,4 +1,12 @@
-import { Controller, Req, Get, Post, UseGuards, Res } from '@nestjs/common';
+import {
+  Controller,
+  Req,
+  Get,
+  Post,
+  UseGuards,
+  Res,
+  Param,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -12,12 +20,14 @@ export class AppController {
     private urlService: UrlService,
   ) {}
 
-  @Get('r/*')
-  getHello(@Req() request: Request, @Res() response: Response) {
+  @Get(':unqUrl')
+  redirectToUrl(
+    @Req() request: Request,
+    @Param() params,
+    @Res() response: Response,
+  ) {
     //Log user request and information like IP, Browser, OS,
-    const redirectedUrl = this.urlService.getMainUrlByUniqueUrl(
-      request.originalUrl.split('/')[2],
-    );
+    const redirectedUrl = this.urlService.getMainUrlByUniqueUrl(params.unqUrl);
     if (redirectedUrl) {
       response.redirect(redirectedUrl);
     } else {
