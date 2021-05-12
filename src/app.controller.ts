@@ -6,6 +6,7 @@ import {
   UseGuards,
   Res,
   Param,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth/auth.service';
@@ -31,7 +32,7 @@ export class AppController {
     if (redirectedUrl) {
       response.redirect(redirectedUrl);
     } else {
-      response.statusCode = 404;
+      response.status(HttpStatus.NOT_FOUND).send();
     }
   }
 
