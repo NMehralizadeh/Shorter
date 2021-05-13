@@ -1,30 +1,36 @@
 import { Injectable } from '@nestjs/common';
-
-export interface User {
-  id: number;
-  username: string;
-  password: string;
-  salt: string;
-}
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './schema/user.schema';
+import { compare, genSalt, hash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [
-    {
-      id: 1,
-      username: 'john',
-      password: 'changeme',
-      salt: 'JhonSalt',
-    },
-    {
-      id: 2,
-      username: 'maria',
-      password: 'guess',
-      salt: 'JhonSalt',
-    },
-  ];
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+  async getByUsername(username: string): Promise<User | undefined> {
+    let user = await this.userModel.findOne({ Username: username }).exec();
+    return user;
+  }
+
+  async validateUser(username: string, pass: string): Promise<any>  { 
+    const user = await this.getByUsername(username);
+    if (user && (await compare(pass, user.Password))) {
+      const { Password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async createAdminUser() {
+    const salt = await genSalt(10);
+    const hashedPassword = await hash('admin', salt);
+    const adminUser = new this.userModel({
+      Id: 1,
+      Username: 'admin',
+      Password: hashedPassword,
+      Salt: salt,
+    });
+    adminUser.save();
   }
 }
